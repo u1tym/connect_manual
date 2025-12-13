@@ -116,12 +116,6 @@ def parse_args() -> Parameters:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--ctrl_ip",
-        type=str,
-        required=True,
-        help="コントロール用IPアドレス",
-    )
-    parser.add_argument(
         "--ctrl_port",
         type=int,
         required=True,
