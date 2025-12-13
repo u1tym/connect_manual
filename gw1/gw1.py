@@ -23,6 +23,7 @@ class Parameters:
     ctrl_ip: str
     ctrl_port: int
     job_port: int
+    debug: bool
 
 lg: Log = Log(0, "gw1")
 lg.debug_off()
@@ -30,6 +31,8 @@ lg.debug_off()
 def main() -> None:
 
     args = parse_args()
+    if args.debug:
+        lg.debug_on()
     main_proc(args)
 
     return
@@ -170,6 +173,11 @@ def parse_args() -> Parameters:
         required=True,
         help="ジョブ用ポート番号",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="デバッグモード有効化",
+    )
 
     args = parser.parse_args()
 
@@ -177,6 +185,7 @@ def parse_args() -> Parameters:
         ctrl_ip=args.ctrl_ip,
         ctrl_port=args.ctrl_port,
         job_port=args.job_port,
+        debug=args.debug,
     )
 
     return params
