@@ -37,8 +37,16 @@ def main_proc(args: Parameters) -> None:
 
     global nm
 
+    ctl: AcpSocket = None
+    ctl_sock: TelSocket = None
+
+    job: AcpSocket = None
+
+    job_soks: List[TelSocket] = []
+
+
     # 制御用のソケットを開く
-    ctl: AcpSocket = AcpSocket()
+    ctl = AcpSocket()
     ctl.open("0.0.0.0", args.ctrl_port)
     lg.output("INF", "制御用ソケット受付開始")
 
@@ -56,11 +64,10 @@ def main_proc(args: Parameters) -> None:
                 not_stb = False
                 break
 
-    job: AcpSocket = AcpSocket()
+    job = AcpSocket()
     job.open("0.0.0.0", args.job_port)
     lg.output("INF", "ジョブ用ソケット受付開始 port=" + str(args.job_port))
 
-    job_soks: List[TelSocket] = []
     job_soks.append(ctl_sock)
 
     while True:
