@@ -179,6 +179,14 @@ class AcpSocket:
 
         return res
 
+    def close(self) -> None:
+        if self.sock is None:
+            return
+        
+        self.sock.close()
+        self.sock = None
+
+
 class SocketSelect:
 
     @classmethod
