@@ -95,11 +95,11 @@ def main_proc(args: Parameters) -> None:
 
                     # 制御ソケットからの受信
                     bt_jnum = i.receive_raw(4)
-                    lg.output_dump("DBG", bt_jnum)
+                    lg.output_dump("INF", bt_jnum)
                     st_jnum = bt_jnum.decode()
 
                     bt_size = i.receive_raw(8)
-                    lg.output_dump("DBG", bt_size)
+                    lg.output_dump("INF", bt_size)
                     st_size = bt_size.decode()
                     it_size = int(st_size)
 
@@ -136,9 +136,9 @@ def main_proc(args: Parameters) -> None:
 
                     lg.output("INF", "制御ソケットに送信 name=" + job_sock.name)
                     ctl_sock.send_raw(bt_jnum)
-                    lg.output_dump("DBG", bt_jnum)
+                    lg.output_dump("INF", bt_jnum)
                     ctl_sock.send_raw(bt_size)
-                    lg.output_dump("DBG", bt_size)
+                    lg.output_dump("INF", bt_size)
                     if it_size > 0:
                         ctl_sock.send_raw(bt_data)
                         lg.output_dump("DBG", bt_data)

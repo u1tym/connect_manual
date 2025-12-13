@@ -80,7 +80,21 @@ class TelSocket:
         """
         if self.sock is None:
             return None
-        data = self.sock.recv(length)
+        if length < 0:
+            length = 4096
+            data = self.sock.recv(length)
+        else:
+            rem_length = length
+            con = True
+            while con:
+                d = self.sock.recv(rem_length)
+                data += d
+                rem_length -= len(d)
+                if rem_length <= 0:
+                    con = False
+    
+#            data = self.sock.recv(length)
+        
         if not data:
             return None
         return data
