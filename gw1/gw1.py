@@ -51,9 +51,10 @@ def main_proc(args: Parameters) -> None:
         not_stb = False
 
     job_soks: list[TelSocket] = []
+    job_soks.append(ctl)
 
     while True:
-        s = SocketSelect.select(ctl, job_soks)
+        s = SocketSelect.select([], job_soks)
 
         if len(s) == 0:
             continue
