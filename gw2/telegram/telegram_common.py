@@ -86,6 +86,7 @@ class TelSocket:
         else:
             rem_length = length
             con = True
+            data = b""
             while con:
                 d = self.sock.recv(rem_length)
                 data += d

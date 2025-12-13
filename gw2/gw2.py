@@ -125,7 +125,7 @@ def main_proc(args: Parameters) -> None:
 
                     st_jnum = i.name
                     bt_jnum = st_jnum.encode()
-                    bt_data = i.receive_raw(2048)
+                    bt_data = i.receive_raw(-1)
 
                     lg.output_dump("DBG", bt_data)
                     it_size = 0
