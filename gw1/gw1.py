@@ -31,7 +31,7 @@ lg.debug_off()
 def main() -> None:
 
     global lg
-    
+
     args = parse_args()
     if args.debug:
         lg.debug_on()
@@ -177,7 +177,8 @@ def parse_args() -> Parameters:
     )
     parser.add_argument(
         "--debug",
-        action="store_true",
+        type=bool,
+        default=False,
         help="デバッグモード有効化",
     )
 
