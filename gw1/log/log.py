@@ -126,7 +126,7 @@ class Log:
 				l1 += ' '
 				l2 += ' '
 		if len(l1) > 0:
-			msg += l1.ljust(16 * 3 + 2) + '    ' + l2 + '\n'
+			msg += l1.ljust(16 * 3 + 2, ' ') + '    ' + l2 + '\n'
 
 		if self.outflag:
 			print( msg )

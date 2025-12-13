@@ -13,12 +13,12 @@ import math
 import inspect
 
 from typing import Literal
+from typing import Self
 from typing import Optional
-from typing import List
 
 class Log:
 
-	def __init__(self, tid: int, name: str, path: str = "") -> None:
+	def __init__(self: Self, tid: int, name: str, path: str = "") -> None:
 
 		if len( path ) == 0:
 			path = os.extsep
@@ -33,12 +33,12 @@ class Log:
 		self.outflag = False
 
 
-	def __del__(self) -> None:
+	def __del__(self: Self) -> None:
 		if self.f:
 			self.f.close()
 
 
-	def output(self, level: Literal["ERR", "INF", "WRN", "DBG"], message: str) -> None:
+	def output(self: Self, level: Literal["ERR", "INF", "WRN", "DBG"], message: str) -> None:
 
 		if ( self.ondebug == False ) and ( level == "DBG" ):
 			return
@@ -68,7 +68,7 @@ class Log:
 		self.f.write( msg + '\n' )
 		self.f.flush()
 
-	def output_dump(self, level: Literal["ERR", "INF", "WRN", "DBG"], message: Optional[bytes]) -> None:
+	def output_dump(self: Self, level: Literal["ERR", "INF", "WRN", "DBG"], message: Optional[bytes]) -> None:
 
 		if ( self.ondebug == False ) and ( level == "DBG" ):
 			return
@@ -94,7 +94,9 @@ class Log:
 			+ filename + ':' + str(lineno) + ' Dump' )
 		msg += '\n'
 
-		chs: List[str] = []
+		chs: list[str] = []
+		chs2: list[str] = []
+
 		mlen: int = 0
 		if message is not None:
 			mlen = len(message)
@@ -102,13 +104,29 @@ class Log:
 		for i in range(0, mlen):
 			# i を16進数で2桁に変換して、chsに追加
 			chs.append( format(message[i], '02X') )
+			# 文字コードが表示可能な範囲の場合、その文字をchs2に追加。そうでない場合はドットを追加
+			if (message[i] >= 0x20) and (message[i] <= 0x7E):
+				chs2.append( chr(message[i]) )
+			else:
+				chs2.append( '.' )
 		
+		l1: str = ''
+		l2: str = ''
 		for c in range(0, len(chs)):
-			msg += ' '
-			msg += chs[c]
+			l1 += chs[c]
+			l2 += chs2[c]
 			if (c + 1) % 16 == 0:
-				msg += '\n'
-		msg += '\n'
+				msg += l1 + '    ' + l2 + '\n'
+				l1 = ''
+				l2 = ''
+			elif (c + 1) % 8 == 0:
+				l1 += '  '
+				l2 += ' '
+			else:
+				l1 += ' '
+				l2 += ' '
+		if len(l1) > 0:
+			msg += l1.ljust(16 * 3 + 2, ' ') + '    ' + l2 + '\n'
 
 		if self.outflag:
 			print( msg )
@@ -117,14 +135,14 @@ class Log:
 		self.f.flush()		
 
 
-	def debug_on(self) -> None:
+	def debug_on(self: Self) -> None:
 		self.ondebug = True
 
-	def debug_off(self) -> None:
+	def debug_off(self: Self) -> None:
 		self.ondebug = False
 
-	def print_on(self) -> None:
+	def print_on(self: Self) -> None:
 		self.outflag = True
 
-	def print_off(self) -> None:
+	def print_off(self: Self) -> None:
 		self.outflag = False
