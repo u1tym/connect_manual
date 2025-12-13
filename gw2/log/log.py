@@ -13,12 +13,12 @@ import math
 import inspect
 
 from typing import Literal
-from typing import Self
 from typing import Optional
+from typing import List
 
 class Log:
 
-	def __init__(self: Self, tid: int, name: str, path: str = "") -> None:
+	def __init__(self, tid: int, name: str, path: str = "") -> None:
 
 		if len( path ) == 0:
 			path = os.extsep
@@ -33,12 +33,12 @@ class Log:
 		self.outflag = False
 
 
-	def __del__(self: Self) -> None:
+	def __del__(self) -> None:
 		if self.f:
 			self.f.close()
 
 
-	def output(self: Self, level: Literal["ERR", "INF", "WRN", "DBG"], message: str) -> None:
+	def output(self, level: Literal["ERR", "INF", "WRN", "DBG"], message: str) -> None:
 
 		if ( self.ondebug == False ) and ( level == "DBG" ):
 			return
@@ -68,7 +68,7 @@ class Log:
 		self.f.write( msg + '\n' )
 		self.f.flush()
 
-	def output_dump(self: Self, level: Literal["ERR", "INF", "WRN", "DBG"], message: Optional[bytes]) -> None:
+	def output_dump(self, level: Literal["ERR", "INF", "WRN", "DBG"], message: Optional[bytes]) -> None:
 
 		if ( self.ondebug == False ) and ( level == "DBG" ):
 			return
@@ -94,7 +94,7 @@ class Log:
 			+ filename + ':' + str(lineno) + ' Dump' )
 		msg += '\n'
 
-		chs: list[str] = []
+		chs: List[str] = []
 		mlen: int = 0
 		if message is not None:
 			mlen = len(message)
@@ -117,14 +117,14 @@ class Log:
 		self.f.flush()		
 
 
-	def debug_on(self: Self) -> None:
+	def debug_on(self) -> None:
 		self.ondebug = True
 
-	def debug_off(self: Self) -> None:
+	def debug_off(self) -> None:
 		self.ondebug = False
 
-	def print_on(self: Self) -> None:
+	def print_on(self) -> None:
 		self.outflag = True
 
-	def print_off(self: Self) -> None:
+	def print_off(self) -> None:
 		self.outflag = False

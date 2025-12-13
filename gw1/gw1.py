@@ -25,6 +25,7 @@ class Parameters:
     job_port: int
 
 lg: Log = Log(0, "gw1")
+lg.debug_off()
 
 def main() -> None:
 

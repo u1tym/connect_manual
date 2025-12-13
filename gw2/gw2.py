@@ -8,6 +8,7 @@ import argparse
 
 from dataclasses import dataclass
 from typing import Optional
+from typing import List
 
 from log.log import Log
 from telegram.telegram_common import TelSocket
@@ -18,6 +19,7 @@ from telegram.telegram_common import SocketSelect
 # インターネット上で参照可能なサーバに配置されるプログラム
 
 lg: Log = Log(0, "gw2")
+lg.debug_off()
 nm: int = 0
 
 @dataclass
@@ -37,7 +39,7 @@ def main_proc(args: Parameters) -> None:
 
     # 制御用のソケットを開く
     ctl: AcpSocket = AcpSocket()
-    ctl.open( "127.0.0.1", args.ctrl_port )
+    ctl.open("0.0.0.0", args.ctrl_port)
     lg.output("INF", "制御用ソケット受付開始")
 
     not_stb: bool = True
@@ -48,17 +50,17 @@ def main_proc(args: Parameters) -> None:
         for i in s:
             if isinstance(i, AcpSocket):
                 ctl_sock = ctl.accept()
-                ctl_sock.set_name( "ctrl" )
+                ctl_sock.set_name("ctrl")
                 ctl.close()
                 lg.output("INF", "制御用ソケット受付接続成功")
                 not_stb = False
                 break
 
     job: AcpSocket = AcpSocket()
-    job.open( "0.0.0.0", args.job_port )
+    job.open("0.0.0.0", args.job_port)
     lg.output("INF", "ジョブ用ソケット受付開始 port=" + str(args.job_port))
 
-    job_soks: list[TelSocket] = []
+    job_soks: List[TelSocket] = []
     job_soks.append(ctl_sock)
 
     while True:
@@ -113,11 +115,15 @@ def main_proc(args: Parameters) -> None:
                 else:
                     # ジョブソケットからの受信
                     lg.output("INF", "ジョブソケットからの受信 name=" + i.name)
+
                     st_jnum = i.name
                     bt_jnum = st_jnum.encode()
                     bt_data = i.receive_raw(2048)
+
                     lg.output_dump("DBG", bt_data)
-                    it_size = len(bt_data)
+                    it_size = 0
+                    if bt_data is not None:
+                        it_size = len(bt_data)
                     st_size = str(it_size).zfill(8)
                     bt_size = st_size.encode()
 
@@ -126,8 +132,9 @@ def main_proc(args: Parameters) -> None:
                     lg.output_dump("DBG", bt_jnum)
                     ctl_sock.send_raw(bt_size)
                     lg.output_dump("DBG", bt_size)
-                    ctl_sock.send_raw(bt_data)
-                    lg.output_dump("DBG", bt_data)
+                    if it_size > 0:
+                        ctl_sock.send_raw(bt_data)
+                        lg.output_dump("DBG", bt_data)
 
     return
 

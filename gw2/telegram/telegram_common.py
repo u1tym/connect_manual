@@ -9,6 +9,7 @@ import select
 
 from typing import Optional
 from typing import Union
+from typing import List
 
 class TelSocket:
 
@@ -190,8 +191,8 @@ class AcpSocket:
 class SocketSelect:
 
     @classmethod
-    def select(cls, srv: Optional[AcpSocket], clts: list[TelSocket], timeout: float = 5) -> list[Union[AcpSocket, TelSocket]]:
-        lst: list[socket.socket] = []
+    def select(cls, srv: Optional[AcpSocket], clts: List[TelSocket], timeout: float = 5) -> List[Union[AcpSocket, TelSocket]]:
+        lst: List[socket.socket] = []
         if srv is not None and srv.sock is not None:
             lst.append(srv.sock)
         for clt in clts:
@@ -203,7 +204,7 @@ class SocketSelect:
         if len(rs) == 0:
             return []
 
-        filterd_clts: list[Union[AcpSocket, TelSocket]] = [clt for clt in clts if clt.sock in rs]
+        filterd_clts: List[Union[AcpSocket, TelSocket]] = [clt for clt in clts if clt.sock in rs]
         if srv is not None and srv.sock in rs:
             filterd_clts.append(srv)
         return filterd_clts
