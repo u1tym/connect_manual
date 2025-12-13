@@ -14,6 +14,7 @@ import inspect
 
 from typing import Literal
 from typing import Self
+from typing import Optional
 
 class Log:
 
@@ -67,7 +68,7 @@ class Log:
 		self.f.write( msg + '\n' )
 		self.f.flush()
 
-	def output_dump(self: Self, level: Literal["ERR", "INF", "WRN", "DBG"], message: bytes) -> None:
+	def output_dump(self: Self, level: Literal["ERR", "INF", "WRN", "DBG"], message: Optional[bytes]) -> None:
 
 		if ( self.ondebug == False ) and ( level == "DBG" ):
 			return
@@ -92,10 +93,13 @@ class Log:
 			+ '(' + str(self.tid) + ') '
 			+ filename + ':' + str(lineno) + ' Dump' )
 		msg += '\n'
-		
+
 		chs: list[str] = []
+		mlen: int = 0
+		if message is not None:
+			mlen = len(message)
 		# messageを1バイトずつ取得して繰り返し処理する。
-		for i in range(0, len(message)):
+		for i in range(0, mlen):
 			# i を16進数で2桁に変換して、chsに追加
 			chs.append( format(message[i], '02X') )
 		
