@@ -34,7 +34,7 @@ def main() -> None:
 def main_proc(args: Parameters) -> None:
 
     global nm
-    
+
     # 制御用のソケットを開く
     ctl: AcpSocket = AcpSocket()
     ctl.open( "127.0.0.1", args.ctrl_port )
@@ -122,11 +122,11 @@ def main_proc(args: Parameters) -> None:
                     bt_size = st_size.encode()
 
                     lg.output("INF", "制御ソケットに送信 name=" + job_sock.name)
-                    job_sock.send_raw(bt_jnum)
+                    ctl_sock.send_raw(bt_jnum)
                     lg.output_dump("DBG", bt_jnum)
-                    job_sock.send_raw(bt_size)
+                    ctl_sock.send_raw(bt_size)
                     lg.output_dump("DBG", bt_size)
-                    job_sock.send_raw(bt_data)
+                    ctl_sock.send_raw(bt_data)
                     lg.output_dump("DBG", bt_data)
 
     return
