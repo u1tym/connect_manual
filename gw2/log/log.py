@@ -67,6 +67,52 @@ class Log:
 		self.f.write( msg + '\n' )
 		self.f.flush()
 
+	def output_dump(self: Self, level: Literal["ERR", "INF", "WRN", "DBG"], message: bytes) -> None:
+
+		if ( self.ondebug == False ) and ( level == "DBG" ):
+			return
+
+		filename = ""
+		lineno = 0
+		cframe = inspect.currentframe()
+		if cframe is not None:
+			frame = cframe.f_back
+			if frame is not None:
+				filename = os.path.basename(frame.f_code.co_filename)
+				lineno = frame.f_lineno
+
+		tm = time.time()
+		tm_int = math.floor( tm )
+		tm_mil = math.floor( tm * 1000 ) - tm_int * 1000
+		dt = datetime.datetime.fromtimestamp( tm_int )
+		dt_str = '{0:%Y-%m-%d %H:%M:%S}'.format( dt ) + '.' + str( tm_mil ).zfill( 3 )
+
+		msg = ( dt_str
+			+ ' [' + level + '] '
+			+ '(' + str(self.tid) + ') '
+			+ filename + ':' + str(lineno) + ' Dump' )
+		msg += '\n'
+		
+		chs: list[str] = []
+		# messageを1バイトずつ取得して繰り返し処理する。
+		for i in range(0, len(message)):
+			# i を16進数で2桁に変換して、chsに追加
+			chs.append( format(message[i], '02X') )
+		
+		for c in range(0, len(chs)):
+			msg += ' '
+			msg += chs[c]
+			if (c + 1) % 16 == 0:
+				msg += '\n'
+		msg += '\n'
+
+		if self.outflag:
+			print( msg )
+
+		self.f.write( msg + '\n' )
+		self.f.flush()		
+
+
 	def debug_on(self: Self) -> None:
 		self.ondebug = True
 

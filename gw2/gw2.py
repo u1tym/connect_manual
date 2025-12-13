@@ -17,6 +17,9 @@ from telegram.telegram_common import SocketSelect
 # メモ
 # インターネット上で参照可能なサーバに配置されるプログラム
 
+lg: Log = Log(0, "gw2")
+nm: int = 0
+
 @dataclass
 class Parameters:
     ctrl_port: int
@@ -30,9 +33,12 @@ def main() -> None:
 
 def main_proc(args: Parameters) -> None:
 
+    global nm
+    
     # 制御用のソケットを開く
     ctl: AcpSocket = AcpSocket()
     ctl.open( "127.0.0.1", args.ctrl_port )
+    lg.output("INF", "制御用ソケット受付開始")
 
     not_stb: bool = True
     while not_stb:
@@ -44,11 +50,13 @@ def main_proc(args: Parameters) -> None:
                 ctl_sock = ctl.accept()
                 ctl_sock.set_name( "ctrl" )
                 ctl.close()
+                lg.output("INF", "制御用ソケット受付接続成功")
                 not_stb = False
                 break
 
     job: AcpSocket = AcpSocket()
     job.open( "0.0.0.0", args.job_port )
+    lg.output("INF", "ジョブ用ソケット受付開始 port=" + str(args.job_port))
 
     job_soks: list[TelSocket] = []
     job_soks.append(ctl_sock)
@@ -63,19 +71,26 @@ def main_proc(args: Parameters) -> None:
             # ジョブソケットからの接続受付
             if isinstance(i, AcpSocket):
                 job_sock = job.accept()
-                job_sock.set_name( "0000" )
+                nm += 1
+                name: str = str(nm).zfill(4)
+                job_sock.set_name( name )
                 job_soks.append(job_sock)
+                lg.output("INF", "ジョブ用ソケット受付接続成功 name=" + name)
             
             # メッセージ受信
             elif isinstance(i, TelSocket):
                 job_sock = i
 
                 if i.name == "ctrl":
+                    lg.output("INF", "制御ソケットからの受信 name=" + i.name)
+
                     # 制御ソケットからの受信
                     bt_jnum = i.receive_raw(4)
+                    lg.output_dump("DBG", bt_jnum)
                     st_jnum = bt_jnum.decode()
 
                     bt_size = i.receive_raw(8)
+                    lg.output_dump("DBG", bt_size)
                     st_size = bt_size.decode()
                     it_size = int(st_size)
 
@@ -84,25 +99,35 @@ def main_proc(args: Parameters) -> None:
                         if job_sock.name == st_jnum:
                             if it_size > 0:
                                 bt_data = i.receive_raw(it_size)
+                                lg.output_dump("DBG", bt_data)
+                                lg.output("INF", "ジョブソケットに送信 name=" + i.name)
                                 job_sock.send_raw(bt_data)
+                                lg.output_dump("DBG", bt_data)
                             else:
                                 # job_sockを切断
                                 job_sock.close()
                                 job_soks.remove(job_sock)
+                                lg.output("INF", "ジョブソケット切断 name=" + i.name)
                             break
 
                 else:
                     # ジョブソケットからの受信
+                    lg.output("INF", "ジョブソケットからの受信 name=" + i.name)
                     st_jnum = i.name
                     bt_jnum = st_jnum.encode()
                     bt_data = i.receive_raw(2048)
+                    lg.output_dump("DBG", bt_data)
                     it_size = len(bt_data)
                     st_size = str(it_size).zfill(8)
                     bt_size = st_size.encode()
 
+                    lg.output("INF", "制御ソケットに送信 name=" + job_sock.name)
                     job_sock.send_raw(bt_jnum)
+                    lg.output_dump("DBG", bt_jnum)
                     job_sock.send_raw(bt_size)
+                    lg.output_dump("DBG", bt_size)
                     job_sock.send_raw(bt_data)
+                    lg.output_dump("DBG", bt_data)
 
     return
 
