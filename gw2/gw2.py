@@ -30,6 +30,8 @@ class Parameters:
 
 def main() -> None:
 
+    global lg
+    
     args = parse_args()
     if args.debug:
         lg.debug_on()

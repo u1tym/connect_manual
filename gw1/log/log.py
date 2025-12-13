@@ -95,6 +95,8 @@ class Log:
 		msg += '\n'
 
 		chs: list[str] = []
+		chs2: list[str] = []
+
 		mlen: int = 0
 		if message is not None:
 			mlen = len(message)
@@ -102,13 +104,29 @@ class Log:
 		for i in range(0, mlen):
 			# i を16進数で2桁に変換して、chsに追加
 			chs.append( format(message[i], '02X') )
+			# 文字コードが表示可能な範囲の場合、その文字をchs2に追加。そうでない場合はドットを追加
+			if (message[i] >= 0x20) and (message[i] <= 0x7E):
+				chs2.append( chr(message[i]) )
+			else:
+				chs2.append( '.' )
 		
+		l1: str = ''
+		l2: str = ''
 		for c in range(0, len(chs)):
-			msg += ' '
-			msg += chs[c]
+			l1 += chs[c]
+			l2 += chs2[c]
 			if (c + 1) % 16 == 0:
-				msg += '\n'
-		msg += '\n'
+				msg += l1 + '    ' + l2 + '\n'
+				l1 = ''
+				l2 = ''
+			elif (c + 1) % 8 == 0:
+				l1 += '  '
+				l2 += ' '
+			else:
+				l1 += ' '
+				l2 += ' '
+		if len(l1) > 0:
+			msg += l1.ljust(16 * 3 + 2) + '    ' + l2 + '\n'
 
 		if self.outflag:
 			print( msg )
