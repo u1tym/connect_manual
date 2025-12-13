@@ -13,8 +13,12 @@ import math
 import inspect
 
 from typing import Literal
-from typing import Self
 from typing import Optional
+
+try:
+	from typing import Self
+except ImportError:
+	from typing_extensions import Self
 
 class Log:
 
