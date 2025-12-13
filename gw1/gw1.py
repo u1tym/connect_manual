@@ -54,12 +54,16 @@ def main_proc(args: Parameters) -> None:
     job_soks.append(ctl)
 
     while True:
+        lg.output("DBG", "同期待ち開始")
         s = SocketSelect.select(None, job_soks)
 
         if len(s) == 0:
             continue
+        lg.output("DBG", "検知")
 
         for i in s:
+            lg.output("DBG", "name = " + i.name)
+            
             if i.name == "ctrl":
                 lg.output("INF", "制御ソケットからの受信")
 
