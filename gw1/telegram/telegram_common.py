@@ -9,6 +9,7 @@ import select
 
 from typing import Optional
 from typing import Union
+from typing import Tuple
 
 class TelSocket:
 
@@ -84,22 +85,7 @@ class TelSocket:
             return None
         return data
 
-    def send(self, message: str) -> None:
-        """送信処理
-
-        Args:
-            message (str): 送信文字列
-
-        Returns:
-            なし
-        """
-        length = len(message)
-        length_str = str(length).zfill(self.siz_msgsiz)
-
-        message_all = length_str + message
-        self.send_raw(message_all.encode())
-
-    def receive(self) -> Optional[str]:
+    def receive(self) -> Tuple[str, int, bytes]:
         """受信処理
 
         Args:
@@ -109,19 +95,47 @@ class TelSocket:
             None: 受信処理異常
             data (str): 受信文字列
         """
-        length_byt = self.receive_raw(self.siz_msgsiz)
-        if length_byt is None:
-            return None
 
-        length_str = length_byt.decode()
-        length = int(length_str)
+        bt_unit = self.receive_raw(4)
+        if bt_unit is None:
+            return ("", 0, b"")
+        st_unit = bt_unit.decode()
 
-        data_byt = self.receive_raw(length)
-        if data_byt is None:
-            return None
-        data = data_byt.decode()
+        bt_size = self.receive_raw(8)
+        if bt_size is None:
+            return (st_unit, 0, b"")
+        st_size = bt_size.decode()
+        it_size = int(st_size)
 
-        return data
+        rem_size = it_size
+        bt_data = b""
+        while rem_size > 0:
+            d = self.receive_raw(rem_size)
+            bt_data += d
+            rem_size -= len(d)
+            if rem_size <= 0:
+                break
+
+        return (st_unit, it_size, bt_data)
+    
+    def send(self, unit: str, bt_data: bytes) -> None:
+        """送信処理
+
+        Args:
+            unit (str): ユニット文字列
+            message (bytes): 送信データ
+
+        Returns:
+            なし
+        """
+
+        bt_unit = unit.encode()
+        st_size = str(len(bt_data)).zfill(8)
+        bt_size = st_size.encode()
+
+        self.send_raw( bt_unit + bt_size + bt_data )
+
+        return
 
 class AcpSocket:
     """接続受付ソケットのクラス"""
