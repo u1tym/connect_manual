@@ -131,7 +131,7 @@ def main_proc(args: Parameters) -> None:
 
                 lg.output("INF", "制御ソケットに送信")
                 ctl.send(st_jnum, bt_data)
-                lg.output_dump("INF", "unit=[" + st_jnum + "] size=[" + str(len(bt_data)) + "]")
+                lg.output("INF", "unit=[" + st_jnum + "] size=[" + str(len(bt_data)) + "]")
                 lg.output_dump("DBG", bt_data)
 
                 if len(bt_data) <= 0:
