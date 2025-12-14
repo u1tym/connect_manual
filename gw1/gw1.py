@@ -122,22 +122,19 @@ def main_proc(args: Parameters) -> None:
 
                 # ジョブソケットからの受信
                 st_jnum = i.name
-                bt_jnum = st_jnum.encode()
 
                 bt_data = i.receive_raw(4096)
+                if bt_data is None:
+                    bt_data = b""
                 lg.output_dump("DBG", bt_data)
 
-                if bt_data is None or len(bt_data) == 0:
-                    it_size = 0
-                else:
-                    it_size = len(bt_data)
 
                 lg.output("INF", "制御ソケットに送信")
-                ctl.send(st_jnum, it_size, bt_data)
-                lg.output_dump("INF", "unit=[" + st_jnum + "] size=[" + str(it_size) + "]")
+                ctl.send(st_jnum, bt_data)
+                lg.output_dump("INF", "unit=[" + st_jnum + "] size=[" + len(bt_data) + "]")
                 lg.output_dump("DBG", bt_data)
 
-                if it_size <= 0:
+                if len(bt_data) <= 0:
                     i.close()
                     job_soks.remove(i)
                     lg.output("INF", "ジョブソケット切断 [" + st_jnum + "]")
