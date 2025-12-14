@@ -18,21 +18,23 @@ from telegram.telegram_common import SocketSelect
 # メモ
 # インターネット上で参照可能なサーバに配置されるプログラム
 
-lg: Log = Log(0, "gw2")
-lg.debug_off()
-nm: int = 0
+lg: Log = None
 
 @dataclass
 class Parameters:
     ctrl_port: int
     job_port: int
     debug: bool
+    logfile: str
 
 def main() -> None:
 
     global lg
-    
+
     args = parse_args()
+    lg = Log(0, args.logfile)
+    lg.debug_off()
+
     if args.debug:
         lg.debug_on()
     main_proc(args)
@@ -177,6 +179,12 @@ def parse_args() -> Parameters:
         default=False,
         help="デバッグモード",
     )
+    parser.add_argument(
+        "--logfile",
+        type=str,
+        default="gw2",
+        help="ログファイル名",
+    )
 
     args = parser.parse_args()
 
@@ -184,6 +192,7 @@ def parse_args() -> Parameters:
         ctrl_port=args.ctrl_port,
         job_port=args.job_port,
         debug=args.debug,
+        logfile=args.logfile,
     )
 
     return params

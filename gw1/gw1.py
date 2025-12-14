@@ -24,15 +24,17 @@ class Parameters:
     ctrl_port: int
     job_port: int
     debug: bool
+    logfile: str
 
-lg: Log = Log(0, "gw1")
-lg.debug_off()
+lg: Log = None
 
 def main() -> None:
 
     global lg
 
     args = parse_args()
+    lg = Log(0, args.logfile)
+    lg.debug_off()
     if args.debug:
         lg.debug_on()
     main_proc(args)
@@ -175,6 +177,12 @@ def parse_args() -> Parameters:
         default=False,
         help="デバッグモード有効化",
     )
+    parser.add_argument(
+        "--logfile",
+        type=str,
+        default="gw1",
+        help="ログファイル名",
+    )
 
     args = parser.parse_args()
 
@@ -183,6 +191,7 @@ def parse_args() -> Parameters:
         ctrl_port=args.ctrl_port,
         job_port=args.job_port,
         debug=args.debug,
+        logfile=args.logfile,
     )
 
     return params
