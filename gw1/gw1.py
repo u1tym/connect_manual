@@ -74,19 +74,21 @@ def main_proc(args: Parameters) -> None:
                 lg.output("INF", "制御ソケットからの受信")
 
                 # 制御ソケットからの受信
-                bt_jnum = i.receive_raw(4)
-                lg.output_dump("DBG", bt_jnum)
-                st_jnum = bt_jnum.decode()
+                rcv = i.receive()
+                if rcv[0] == "":
+                    lg.output("ERR", "制御ソケット切断検知")
+                    i.close()
+                    return
+                
+                st_jnum = rcv[0]
+                it_size = rcv[1]
+                bt_data = rcv[2]
 
-                bt_size = i.receive_raw(8)
-                lg.output_dump("DBG", bt_size)
-                st_size = bt_size.decode()
-                it_size = int(st_size)
+                lg.output("INF", "unit=[" + st_jnum + "] size=[" + str(it_size) + "]")
+                lg.output_dump("DBG", bt_data)
 
                 if it_size > 0:
-                    bt_data = i.receive_raw(it_size)
-                    lg.output_dump("DBG", bt_data)
-
+                    # ジョブソケットに送信
                     sck: Optional[TelSocket] = None
                     for job_sock in job_soks:
                         if job_sock.name == st_jnum:
@@ -102,7 +104,8 @@ def main_proc(args: Parameters) -> None:
                             continue
                         lg.output("INF", "ジョブソケット接続成功 [" + st_jnum + "]")
                         sck.set_name(st_jnum)
-                        job_soks.append(sck)    
+                        job_soks.append(sck)
+
                     sck.send_raw(bt_data)
                     lg.output("INF", "ジョブソケットに送信 [" + st_jnum + "]")
                     lg.output_dump("DBG", bt_data)
@@ -121,30 +124,24 @@ def main_proc(args: Parameters) -> None:
                 st_jnum = i.name
                 bt_jnum = st_jnum.encode()
 
-                bt_data = i.receive_raw(2048)
+                bt_data = i.receive_raw(4096)
                 lg.output_dump("DBG", bt_data)
 
                 if bt_data is None or len(bt_data) == 0:
                     it_size = 0
                 else:
                     it_size = len(bt_data)
-                st_size = str(it_size).zfill(8)
-                bt_size = st_size.encode()
 
                 lg.output("INF", "制御ソケットに送信")
-                ctl.send_raw(bt_jnum)
-                lg.output_dump("DBG", bt_jnum)
-                ctl.send_raw(bt_size)
-                lg.output_dump("DBG", bt_size)
-                if it_size > 0:
-                    ctl.send_raw(bt_data)
-                    lg.output_dump("DBG", bt_data)
+                ctl.send(st_jnum, it_size, bt_data)
+                lg.output_dump("INF", "unit=[" + st_jnum + "] size=[" + str(it_size) + "]")
+                lg.output_dump("DBG", bt_data)
+
                 if it_size <= 0:
                     i.close()
                     job_soks.remove(i)
                     lg.output("INF", "ジョブソケット切断 [" + st_jnum + "]")
     
-
     return
 
 

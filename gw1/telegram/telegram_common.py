@@ -14,9 +14,10 @@ from typing import Tuple
 class TelSocket:
 
     def __init__(self) -> None:
-        self.name: str = "noname"
+        self.name: str = "nonm"
         self.sock: Optional[socket.socket] = None
         self.siz_msgsiz = 8
+        self.siz_namsiz = 4
 
     def connect(self, ip: str = "127.0.0.1", port: int = 50001) -> bool:
         """接続処理
@@ -96,12 +97,12 @@ class TelSocket:
             data (str): 受信文字列
         """
 
-        bt_unit = self.receive_raw(4)
+        bt_unit = self.receive_raw(self.siz_namsiz)
         if bt_unit is None:
             return ("", 0, b"")
         st_unit = bt_unit.decode()
 
-        bt_size = self.receive_raw(8)
+        bt_size = self.receive_raw(self.siz_msgsiz)
         if bt_size is None:
             return (st_unit, 0, b"")
         st_size = bt_size.decode()
@@ -129,8 +130,8 @@ class TelSocket:
             なし
         """
 
-        bt_unit = unit.encode()
-        st_size = str(len(bt_data)).zfill(8)
+        bt_unit = unit.ljust(self.siz_namsiz).encode()
+        st_size = str(len(bt_data)).zfill(self.siz_msgsiz)
         bt_size = st_size.encode()
 
         self.send_raw( bt_unit + bt_size + bt_data )
