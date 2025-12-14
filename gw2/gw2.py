@@ -19,6 +19,7 @@ from telegram.telegram_common import SocketSelect
 # インターネット上で参照可能なサーバに配置されるプログラム
 
 lg: Log = None
+nm: int = 0
 
 @dataclass
 class Parameters:
